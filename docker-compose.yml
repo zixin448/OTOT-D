@@ -1,0 +1,97 @@
+version: '2'
+services:
+  zookeeper1:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper1
+    ports:
+      - "22181:22181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+    networks:
+      - proxy
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper2
+    ports:
+      - "32181:32181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+    networks:
+      - proxy
+
+  zookeeper3:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper3
+    ports:
+      - "42181:42181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 42181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:2888:3888;zookeeper2:2888:3888;zookeeper3:2888:3888
+    networks:
+      - proxy
+
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka1
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:22181,zookeeper3:22181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:29092
+    networks:
+      - proxy
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka2
+    ports:
+      - "39092:39092"
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:22181,zookeeper3:22181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:39092
+    networks:
+      - proxy
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka3
+    ports:
+      - "49092:49092"
+    depends_on:
+      - zookeeper1
+      - zookeeper2
+      - zookeeper3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:22181,zookeeper2:22181,zookeeper3:22181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:49092
+    networks:
+      - proxy
+networks:
+  proxy:
+    driver: bridge
